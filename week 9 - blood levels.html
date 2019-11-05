@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Leaflet Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css"/>
+  <style>
+  html { height:100%;}
+
+body {
+    height:100%;
+    padding: 0;
+    margin: 0;
+}
+
+#map {
+	width: 100%;
+	margin: 0 auto;
+	height: 95%;
+}
+
+#header {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+
+.info {
+    z-index: 1000;
+    position: absolute;
+    right: 40%;
+    top: 5%;
+    padding: 6px 8px;
+    font: 14px Arial, Helvetica, sans-serif;
+    text-align: center;
+    background: white;
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+}
+
+.info h1 {
+    font-size: 16px;
+    margin: 0 0 5px;
+    color: #777777;
+}
+
+
+.legend {
+	line-height: 18px;
+	color: #333333;
+	font-family: 'Open Sans', Helvetica, sans-serif;
+	padding: 6px 8px;
+	background: white;
+	background: rgba(255,255,255,0.8);
+	box-shadow: 0 0 15px rgba(0,0,0,0.2);
+	border-radius: 5px;
+}
+
+.legend i {
+	width: 28px;
+	height: 18px;
+	float: left;
+	margin-right: 8px;
+	opacity: 0.7;
+}
+
+
+.legend p {
+	font-size: 12px;
+	line-height: 18px;
+	margin: 0;
+}
+
+</style>
+</head>
+<body>
+  <!-- Our web map and content will go here -->
+  <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <div id="map" style="width: 1000px; height: 600px">
+  </div>
+  <script>
+      var map = L.map('map', {center: [39.981192, -75.155399], zoom: 10});
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+      map.doubleClickZoom.disable();
+
+      // add point marker
+      var myDataPoint = L.marker([39.981192, -75.155399]).addTo(map);
+      myDataPoint.bindPopup("This is Temple University.");
+      myDataPoint.bindPopup("<h3>Temple University</h3><p>Philadelphia, PA<br>Information about Temple University.</p>");
+
+      // // create a polyline
+      // var myDataLine = L.polyline([[40.076287, -75.083570],
+      //       [40.063801, -75.086783],
+      //       [40.059006, -75.093027],
+      //       [40.051616, -75.103458],
+      //       [40.034649, -75.122654],
+      //       [40.022324, -75.159859],
+      //       [39.994278, -75.154469],
+      //       [39.981586, -75.149515]
+      //       ],
+      //         {color: 'blue', weight: 5}).addTo(map);
+
+      // Bind popup to area object
+      //myArea.bindPopup("Philadelphia metro");
+
+      // create a polygon of Philadelphia metro
+     // var myArea = L.polygon([[40.134261, -75.270050],
+     //                          [40.138132, -74.888837],
+     //                          [39.873212, -74.988837],
+     //                          [39.859046, -75.377775]
+     //                          ],
+     //               {color: 'blue', weight: 1}).addTo(map);
+
+      // Create an Empty Popup
+      var popup = L.popup();
+
+      // Write function to set Properties of the Popup
+      function onMapClick(e) {
+          popup
+              .setLatLng(e.latlng)
+              .setContent("You clicked the map at " + e.latlng.toString())
+              .openOn(map);
+      }
+
+      // Listen for a click event on the Map element
+      map.on('click', onMapClick);
+
+      // Set style function that sets fill color property equal to blood lead
+      function styleFunc(feature) {
+          return {
+              fillColor: setColorFunc(feature.properties.num_bll_5p),
+              fillOpacity: 0.9,
+              weight: 1,
+              opacity: 1,
+              color: '#ffffff',
+              dashArray: '3'
+          };
+      }
+
+// Set function for color ramp, you can use a better palette
+function setColorFunc(density){
+    return density > 15 ? '#880000' :
+           density > 10 ? '#bc5a45' :
+           density > 5 ? '#f18973' :
+           density > 0 ? '#f4e1d2' :
+                         '#BFBCBB';
+};
+
+// function setColorFunc(density){
+//     return density > 12 ? '#880000' :
+//            density > 7 ? '#bc5a45' :
+//            density > 3 ? '#f18973' :
+//            density > 0 ? '#f4e1d2' :
+//                          '#BFBCBB';
+// };
+
+
+      //load GeoJSON from an external file
+      // var neighborhoodsLayer = null;
+      // $.getJSON("data/blood_lead.geojson",function(data){
+      //     neighborhoodsLayer = L.geoJson(data, {
+      //         style: styleFunc,
+      //         onEachFeature: function(feature, layer){
+      //           // onEachFeature:
+      //           // function onEachFeatureFunc(feature, layer){
+      //           layer.on({
+      //                   mouseover: highlightFeature,
+      //                   mouseout: resetHighlight,
+      //                   click: zoomFeature
+      //               });
+      //           }
+      //           layer.bindPopup('Blood lead level: '+feature.properties.perc_5plus);
+      //         }
+      //     }).addTo(map);
+      // });
+
+
+
+      var neighborhoodsLayer = null;
+      $.getJSON("data/blood_lead.geojson",function(data){
+          neighborhoodsLayer = L.geoJson(data, {
+              style: styleFunc,
+              onEachFeature: function(feature, layer){
+                  layer.bindPopup('Blood lead level: '+feature.properties.num_bll_5p);
+                  layer.on({
+                          mouseover: highlightFeature,
+                          mouseout: resetHighlight,
+                          click: zoomFeature
+                      });
+              }
+          }).addTo(map).bringToBack();
+      });
+
+
+
+      // create a polyline
+      var myDataLine = L.polyline([[40.076287, -75.083570],
+            [40.063801, -75.086783],
+            [40.059006, -75.093027],
+            [40.051616, -75.103458],
+            [40.034649, -75.122654],
+            [40.022324, -75.159859],
+            [39.994278, -75.154469],
+            [39.981586, -75.149515]
+            ],
+              {color: 'blue', weight: 5}).addTo(map).bringToFront;
+
+
+      // Bind popup to line object
+      // myDataLine.bindPopup("Chestnut Line");
+
+      // for different web browsers
+      // if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+      //   layer.bringToFront();
+      // }
+
+      function highlightFeature(e){
+          var layer = e.target;
+
+          layer.setStyle({
+              weight: 5,
+              color: '#666',
+              dashArray: '',
+              fillOpacity: 0.7
+          });
+          // for different web browsers
+          if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+              layer.bringToBack();
+          }
+      }
+
+
+      // Define what happens on mouseout:
+      function resetHighlight(e) {
+      neighborhoodsLayer.resetStyle(e.target).bringToBack();
+      }
+
+      // As an additional touch, let’s define a click listener that zooms to the state:
+      function zoomFeature(e){
+      console.log(e.target.getBounds());
+      map.fitBounds(e.target.getBounds().pad(1.5));
+      }
+
+      // Add Scale Bar to Map
+      L.control.scale({position: 'bottomleft'}).addTo(map);
+
+
+      // Create Leaflet Control Object for Legend
+      var legend = L.control({position: 'bottomright'});
+
+      // Function that runs when legend is added to map
+      legend.onAdd = function (map) {
+      // Create Div Element and Populate it with HTML
+      var div = L.DomUtil.create('div', 'legend');
+      div.innerHTML += '<b>Blood lead level</b><br />';
+      div.innerHTML += 'by census tract<br />';
+      div.innerHTML += '<br>';
+      div.innerHTML += '<i style="background: #880000"></i><p>15+</p>';
+      div.innerHTML += '<i style="background: #bc5a45"></i><p>10-15</p>';
+      div.innerHTML += '<i style="background: #f18973"></i><p>5-10</p>';
+      div.innerHTML += '<i style="background: #f4e1d2"></i><p>0-5</p>';
+      div.innerHTML += '<hr>';
+      div.innerHTML += '<i style="background: #BFBCBB"></i><p>No Data</p>';
+
+
+      // var div = L.DomUtil.create('div', 'legend');
+      // div.innerHTML += '<b>Blood lead level</b><br />';
+      // div.innerHTML += 'by census tract<br />';
+      // div.innerHTML += '<br>';
+      // div.innerHTML += '<i style="background: #880000"></i><p>12+</p>';
+      // div.innerHTML += '<i style="background: #bc5a45"></i><p>7-12</p>';
+      // div.innerHTML += '<i style="background: #f18973"></i><p>3-7</p>';
+      // div.innerHTML += '<i style="background: #f4e1d2"></i><p>0-3</p>';
+      // div.innerHTML += '<hr>';
+      // div.innerHTML += '<i style="background: #BFBCBB"></i><p>No Data</p>';
+      // Return the Legend div containing the HTML content
+      return div;
+      };
+
+      // Add Legend to Map
+      legend.addTo(map);
+
+
+
+  </script>
+</body>
+</html>
