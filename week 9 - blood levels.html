@@ -140,21 +140,31 @@ body {
       }
 
 // Set function for color ramp, you can use a better palette
-function setColorFunc(density){
-    return density > 15 ? '#880000' :
-           density > 10 ? '#bc5a45' :
-           density > 5 ? '#f18973' :
-           density > 0 ? '#f4e1d2' :
-                         '#BFBCBB';
-};
+// function setColorFunc(density){
+//     return density > 15 ? 'blue' :
+//            density > 10 ? 'blue' :
+//            density > 5 ? 'blue' :
+//            density > 0 ? 'blue' :
+//                          'blue';
+// };
 
 // function setColorFunc(density){
-//     return density > 12 ? '#880000' :
-//            density > 7 ? '#bc5a45' :
-//            density > 3 ? '#f18973' :
+//     return density > 15 ? '#880000' :
+//            density > 10 ? '#bc5a45' :
+//            density > 5 ? '#f18973' :
 //            density > 0 ? '#f4e1d2' :
 //                          '#BFBCBB';
 // };
+
+
+
+function setColorFunc(density){
+    return density > 27 ? '#880000' :
+           density > 18 ? '#bc5a45' :
+           density > 9 ? '#f18973' :
+           density > 0 ? '#f4e1d2' :
+                         '#BFBCBB';
+};
 
 
       //load GeoJSON from an external file
@@ -205,7 +215,8 @@ function setColorFunc(density){
             [39.994278, -75.154469],
             [39.981586, -75.149515]
             ],
-              {color: 'blue', weight: 5}).addTo(map).bringToFront;
+              {color: 'red', weight: 5}).addTo(map).bringToFront;
+
 
 
       // Bind popup to line object
@@ -253,28 +264,28 @@ function setColorFunc(density){
       // Function that runs when legend is added to map
       legend.onAdd = function (map) {
       // Create Div Element and Populate it with HTML
-      var div = L.DomUtil.create('div', 'legend');
-      div.innerHTML += '<b>Blood lead level</b><br />';
-      div.innerHTML += 'by census tract<br />';
-      div.innerHTML += '<br>';
-      div.innerHTML += '<i style="background: #880000"></i><p>15+</p>';
-      div.innerHTML += '<i style="background: #bc5a45"></i><p>10-15</p>';
-      div.innerHTML += '<i style="background: #f18973"></i><p>5-10</p>';
-      div.innerHTML += '<i style="background: #f4e1d2"></i><p>0-5</p>';
-      div.innerHTML += '<hr>';
-      div.innerHTML += '<i style="background: #BFBCBB"></i><p>No Data</p>';
-
-
       // var div = L.DomUtil.create('div', 'legend');
       // div.innerHTML += '<b>Blood lead level</b><br />';
       // div.innerHTML += 'by census tract<br />';
       // div.innerHTML += '<br>';
-      // div.innerHTML += '<i style="background: #880000"></i><p>12+</p>';
-      // div.innerHTML += '<i style="background: #bc5a45"></i><p>7-12</p>';
-      // div.innerHTML += '<i style="background: #f18973"></i><p>3-7</p>';
-      // div.innerHTML += '<i style="background: #f4e1d2"></i><p>0-3</p>';
+      // div.innerHTML += '<i style="background: #880000"></i><p>15+</p>';
+      // div.innerHTML += '<i style="background: #bc5a45"></i><p>10-15</p>';
+      // div.innerHTML += '<i style="background: #f18973"></i><p>5-10</p>';
+      // div.innerHTML += '<i style="background: #f4e1d2"></i><p>0-5</p>';
       // div.innerHTML += '<hr>';
       // div.innerHTML += '<i style="background: #BFBCBB"></i><p>No Data</p>';
+
+
+      var div = L.DomUtil.create('div', 'legend');
+      div.innerHTML += '<b>Blood lead level</b><br />';
+      div.innerHTML += 'by census tract<br />';
+      div.innerHTML += '<br>';
+      div.innerHTML += '<i style="background: #880000"></i><p>27+</p>';
+      div.innerHTML += '<i style="background: #bc5a45"></i><p>18-27</p>';
+      div.innerHTML += '<i style="background: #f18973"></i><p>9-18</p>';
+      div.innerHTML += '<i style="background: #f4e1d2"></i><p>0-9</p>';
+      div.innerHTML += '<hr>';
+      div.innerHTML += '<i style="background: #BFBCBB"></i><p>No Data</p>';
       // Return the Legend div containing the HTML content
       return div;
       };
@@ -282,6 +293,20 @@ function setColorFunc(density){
       // Add Legend to Map
       legend.addTo(map);
 
+      myDataLine.bindPopup("Fox Chase");
+            </script>
+      <script>
+            //Define the coordinates we want our markers to be at
+            var temple_coords = L.marker([39.981586, -75.149515]).addTo(map);
+            temple_coords.bindPopup("Temple");
+
+            var north_broad = L.marker([39.994278, -75.154469]).addTo(map);
+            north_broad.bindPopup("North Broad");
+
+            var olney = L.marker([40.034649, -75.122654]).addTo(map);
+            olney.bindPopup("Olney");
+
+      </script>
 
 
   </script>
