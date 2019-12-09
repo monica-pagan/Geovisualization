@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Leaflet Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css"/>
+  <style>
+  html { height:100%;}
+
+body {
+    height:100%;
+    padding: 0;
+    margin: 0;
+}
+
+#map {
+	width: 100%;
+	margin: 0 auto;
+	height: 95%;
+}
+
+#header {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+
+.info {
+    z-index: 1000;
+    position: absolute;
+    right: 40%;
+    top: 5%;
+    padding: 6px 8px;
+    font: 14px Arial, Helvetica, sans-serif;
+    text-align: center;
+    background: white;
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+}
+
+.info h1 {
+    font-size: 16px;
+    margin: 0 0 5px;
+    color: #777777;
+}
+
+
+.legend {
+	line-height: 18px;
+	color: #333333;
+	font-family: 'Open Sans', Helvetica, sans-serif;
+	padding: 6px 8px;
+	background: white;
+	background: rgba(255,255,255,0.8);
+	box-shadow: 0 0 15px rgba(0,0,0,0.2);
+	border-radius: 5px;
+}
+
+.legend i {
+	width: 32px;
+	height: 18px;
+	float: left;
+	margin-right: 10px;
+	opacity: 0.7;
+}
+
+
+.legend p {
+	font-size: 12px;
+	line-height: 18px;
+	margin: 0;
+}
+
+</style>
+</head>
+<body>
+  <!-- Our web map and content will go here -->
+  <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script
+  <script src="C:\Users\tuf91019\Schools.js"></script>
+  <div id="map" style="width: 1000px; height: 600px">
+  </div>
+  <script>
+      var map = L.map('map', {center: [39.981192, -75.155399], zoom: 10});
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+      map.doubleClickZoom.disable();
+
+
+      // Create an Empty Popup
+      var popup = L.popup();
+
+      // Write function to set Properties of the Popup
+      function onMapClick(e) {
+          popup
+              .setLatLng(e.latlng)
+              .setContent("You clicked the map at " + e.latlng.toString())
+              .openOn(map);
+      }
+
+      // Listen for a click event on the Map element
+      map.on('click', onMapClick);
+
+function setColorFunc(colorty){
+    switch (colorty) {
+      case 'Archdiocese':
+        return '#d3d3d3';
+      case  'Private' :
+        return '#151515';
+      case 'Charter':
+        return 'red';
+      case 'District' :
+        return 'green';
+      default:
+       return 'black';
+    }
+};
+
+// function setColorFunc(colorty){
+//     switch (colorty) {
+//       case 'Archdiocese':
+//         return 'yellow';
+//       case  'Private' :
+//         return 'blue';
+//       case 'Charter':
+//         return 'purple';
+//       case 'District' :
+//         return 'green';
+//       default:
+//        return 'grey';
+//     }
+// };
+
+
+var neighborhoodsLayer = null;
+$.getJSON("data/neighborhoods_philadelphia.geojson",function(data){
+    neighborhoodsLayer = L.geoJson(data, {
+        // style: styleFunc,
+        onEachFeature: function(feature, layer){
+            layer.bindPopup('neighborhoods_philadelphia: '+feature.properties.MAPNAME);
+            layer.on({
+                    mouseover: highlightFeature,
+                    mouseout: resetHighlight,
+                    click: zoomFeature
+                });
+        }
+    }).addTo(map).bringToBack();
+});
+
+      // load GeoJSON from an external file
+      var neighborhoodsLayer = null;
+      $.getJSON("data/Schools.geojson",function(data){
+          Schools = L.geoJson(data, {
+              pointToLayer: function(feature, latlng) {
+                return new L.CircleMarker(latlng, {
+                  radius: 8,
+                  fillColor: setColorFunc(feature.properties.TYPE_SPECIFIC),
+                  color: "black",
+                  weight: .5
+                });
+              },
+              onEachFeature: function(feature, layer){
+                onEachFeature:
+                function onEachFeatureFunc(feature, layer){
+                layer.on({
+                        mouseover: highlightFeature,
+                        mouseout: resetHighlight,
+                        click: zoomFeature
+                    });
+                }
+                layer.bindPopup('School Type: '+feature.properties.TYPE_SPECIFIC + '<br>'
+                 + 'Enrollment: '+feature.properties.ENROLLMENT + '<br>' + 'School Name: ' +feature.properties.SCHOOL_NAME);
+              }
+          }).addTo(map);
+      });
+
+
+
+
+      function highlightFeature(e){
+          var layer = e.target;
+
+          layer.setStyle({
+              weight: 5,
+              color: '#666',
+              dashArray: '',
+              fillOpacity: 0.7
+          });
+          // for different web browsers
+          if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+              layer.bringToBack();
+          }
+      }
+
+
+      // Define what happens on mouseout:
+      function resetHighlight(e) {
+      neighborhoodsLayer.resetStyle(e.target).bringToBack();
+      }
+
+      // As an additional touch, let’s define a click listener that zooms to the state:
+      function zoomFeature(e){
+      console.log(e.target.getBounds());
+      map.fitBounds(e.target.getBounds().pad(1.5));
+      }
+
+      // Add Scale Bar to Map
+      L.control.scale({position: 'bottomleft'}).addTo(map);
+
+
+      // Create Leaflet Control Object for Legend
+      var legend = L.control({position: 'bottomright'});
+
+      // Function that runs when legend is added to map
+      legend.onAdd = function (map) {
+
+      var div = L.DomUtil.create('div', 'legend');
+      div.innerHTML += '<b>Schools </b><br />';
+      div.innerHTML += 'by Type of School <br />';
+      div.innerHTML += '<br>';
+      // div.innerHTML += '<i style="background: grey"></i><p>Archdiocese</p>';
+      // div.innerHTML += '<i style="background: grey"></i><p>Private</p>';
+      div.innerHTML += '<i style="background: #90EE90"></i><p>District</p>';
+      div.innerHTML += '<i style="background: #ffcccb"></i><p>Charter</p>';
+      div.innerHTML += '<hr>';
+      div.innerHTML += '<i style="background: #d3d3d3"></i><p>Archdiocese</p>';
+      div.innerHTML += '<i style="background: #545454"></i><p>Private</p>';
+      // Return the Legend div containing the HTML content
+      return div;
+      };
+
+      // Add Legend to Map
+      legend.addTo(map);
+
+
+
+      // legend.onAdd = function (map) {
+      //
+      // var div = L.DomUtil.create('div', 'legend');
+      // div.innerHTML += '<b>Schools </b><br />';
+      // div.innerHTML += 'by Type of School <br />';
+      // div.innerHTML += '<br>';
+      // div.innerHTML += '<i style="background: #f0f770"></i><p>Archdiocese</p>';
+      // div.innerHTML += '<i style="background: #a1caf1"></i><p>Private</p>';
+      // div.innerHTML += '<i style="background: #90EE90"></i><p>District</p>';
+      // div.innerHTML += '<i style="background: #CE9DD9"></i><p>Charter</p>';
+      // div.innerHTML += '<hr>';
+      // div.innerHTML += '<i style="background: grey"></i><p>No Data</p>';
+      // // Return the Legend div containing the HTML content
+      // return div;
+      // };
+      //
+      // // Add Legend to Map
+      // legend.addTo(map);
+
+
+  </script>
+</body>
+</html>
